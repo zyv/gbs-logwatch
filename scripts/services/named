@@ -171,7 +171,8 @@ while (defined($ThisLine = <STDIN>)) {
       ($ThisLine =~ /isc_log_open 'named.run' failed: permission denied/) or 
       ($ThisLine =~ /weak RSASHA1 \(5\) key found \(exponent=3\)/) or 
       ($ThisLine =~ /Bad file descriptor/) or 
-      ($ThisLine =~ /open: .*: file not found/)
+      ($ThisLine =~ /open: .*: file not found/) or
+      ($ThisLine =~ /queries: client [0-9.#:]* view localhost_resolver: query: .* IN .*/)
    ) {
       # Don't care about these...
    } elsif (
