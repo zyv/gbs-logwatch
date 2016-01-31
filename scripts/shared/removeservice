@@ -24,10 +24,13 @@ if ( $ENV{'LOGWATCH_DEBUG'} > 5 ) {
 
 $ServiceName = $ARGV[0];
 
+#Change commas to pipes -mgt
+$ServiceName =~ s/,/|/g;
+
 while (defined($ThisLine = <STDIN>)) {
    $linesin++;
-   unless ( ($ThisLine =~ m/^... .. ..:..:.. [^ ]* $ServiceName\[[0123456789]*\]: /oi) or
-         ($ThisLine =~ m/^... .. ..:..:.. [^ ]* $ServiceName: /oi) ) {
+   unless ( ($ThisLine =~ m/^... .. ..:..:.. [^ ]* ($ServiceName)\[[0123456789]*\]: /oi) or
+            ($ThisLine =~ m/^... .. ..:..:.. [^ ]* (:\s*)?($ServiceName)\s*: /oi) ) {
       $linesout++;
       print $ThisLine;
    }
