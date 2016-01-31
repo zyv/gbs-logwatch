@@ -203,6 +203,10 @@ while (defined($ThisLine = <STDIN>)) {
       (($Error) = ($ThisLine =~ /(cannot exec process.*)/)) 
       )  ) {
       $INCRONDErr{$Error}++;
+   } elsif ( ($ThisLine =~ /crond/) &&
+	(($Error) = ($ThisLine =~ /(failed to open PAM security session: (Permission denied|Module is unknown))/)) 
+	) {
+      $CRONDErr{$Error}++;
    } else {
       # Report any unmatched entries...
       push @OtherList, "$ThisLine\n";
@@ -327,6 +331,14 @@ if ((%INCRONDSTDe) || (%INCRONDUTDe)) {
      print "    table for user ". $key ." destroyed " .$INCRONDUTDe{$key} . ": time(s)\n";
   }
 }
+
+if (%CRONDErr) {
+  printf "\n  crond daemon errors \n";
+  for $key (keys %CRONDErr) {
+    print "    " . $key . ": " . $CRONDErr{$key} . " time(s)\n";
+  }
+}
+          
 
 if (%INCRONDErr) {
   printf "\n  incrond daemon errors \n";
