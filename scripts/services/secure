@@ -213,7 +213,8 @@ while (defined($ThisLine = <STDIN>)) {
       ( $ThisLine =~ /pam_succeed_if\(.*:.*\): error retrieving information about user [a-zA-Z]*/ ) or
       ( $ThisLine =~ /logfile turned over/) or # newsyslog on OpenBSD
       ( $ThisLine =~ /Connection closed by/) or
-      ( $ThisLine =~ /sshd.*: Accepted \S+ for \S+ from [\d\.:a-f]+ port \d+/) # ssh script reads this log 
+      ( $ThisLine =~ /sshd.*: Accepted \S+ for \S+ from [\d\.:a-f]+ port \d+/) or # ssh script reads this log ) 
+      ( $ThisLine =~ /userhelper.*: running (.*) with context (.*)/)
    ) {
       # Ignore these entries
    } elsif ($ThisLine =~ /^spop3d/ || $ThisLine =~ /^pop\(\w+\)\[\d+\]:/) {
