@@ -927,6 +927,7 @@ foreach $LogFile (@LogFileList) {
          print "\n";
          next;
       }
+      next if (-z $ThisFile);
       $FileText .= ("'" . $ThisFile . "' ");
    } #End foreach ThisFile
 
