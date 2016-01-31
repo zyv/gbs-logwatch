@@ -228,7 +228,8 @@ while (defined(my $ThisLine = <STDIN>)) {
        ($ThisLine =~ /^input_userauth_request: (illegal|invalid) user (.*)$/ ) or
        ($ThisLine =~ m/^(Illegal|Invalid) user (.*) from ([^ ]+)/ ) or
        ($ThisLine =~ /pam_krb5: authentication succeeds for `([^ ]*)'/) or
-       ( $ThisLine =~ /pam_succeed_if\(.*:.*\): error retrieving information about user [a-zA-Z]*/ )           
+       ($ThisLine =~ /pam_succeed_if\(.*:.*\): error retrieving information about user [a-zA-Z]*/ ) or
+       ($ThisLine =~ /^debug1: /)
    ) {
       # Ignore these
    } elsif ( my ($Method,$User,$Host,$Port) = ($ThisLine =~ /^Accepted (\S+) for (\S+) from ([\d\.:a-f]+) port (\d+)/) ) {
