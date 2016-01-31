@@ -61,13 +61,7 @@ my (@ReadConfigNames, @ReadConfigValues);
 
 # Default config here...
 $Config{'detail'} = 0;
-# if MAILTO is set in the environment, grab it, as it may be used by cron 
-# or anacron 
-if ($ENV{'MAILTO'}) { 
-    $Config{'mailto'} = $ENV{'MAILTO'}; 
-} else { 
-    $Config{'mailto'} = "root"; 
-} 
+$Config{'mailto'} = "root";
 $Config{'mailfrom'} = "Logwatch";
 $Config{'save'} = "";
 $Config{'print'} = 1;
@@ -119,7 +113,7 @@ sub Usage () {
       "   [--print] [--mailto <addr>] [--archives] [--range <range>] [--debug <level>]\n" .
       "   [--save <filename>] [--help] [--version] [--service <name>]\n" .
       "   [--numeric] [--output <output_type>]\n" .
-      "   [--splithosts] [--multiemail] [--no-oldfiles-log]\n\n";
+      "   [--splithosts] [--multiemail]\n\n";
    print "--detail <level>: Report Detail Level - High, Med, Low or any #.\n";
    print "--logfile <name>: *Name of a logfile definition to report on.\n";
    print "--logdir <name>: Name of default directory where logs are stored.\n";
@@ -140,8 +134,6 @@ sub Usage () {
    print "              not using --splithosts.\n";
    print "--output <output type>: Report Format - mail, html or unformatted#.\n";
    print "--encode: Use base64 encoding on output mail.\n";
-   print "--no-oldfiles-log: Suppress the logwatch log, which informs about the\n"; 
-   print "                   old files in logwatch tmpdir.\n"; 
    print "--version: Displays current version.\n";
    print "--help: This message.\n";
    print "* = Switch can be specified multiple times...\n\n";
@@ -328,7 +320,6 @@ my @TempLogFileList = ();
 my @TempServiceList = ();
 my $Help = 0;
 my $ShowVersion = 0;
-my $NoOldfilesLog = 0;
 my $tmp_mailto;
 
 GetOptions ( "d|detail=s"   => \$Config{'detail'},
@@ -349,8 +340,7 @@ GetOptions ( "d|detail=s"   => \$Config{'detail'},
              "multiemail"   => \$Config{'multiemail'},
              "o|output=s"   => \$Config{'output'},
              "encode"       => \$Config{'encode'},
-             "html_wrap=s"  => \$Config{'html_wrap'},
-             "no-oldfiles-log" => \$NoOldfilesLog
+             "html_wrap=s"  => \$Config{'html_wrap'}
            ) or Usage();
 
 $Help and Usage();
@@ -416,13 +406,7 @@ if (($Config{'save'} ne "") && (-e "$Config{'save'}") ) {
 }
 
 if ($Config{'mailto'} eq "") {
-   #Additionally check for 'save' if 'mailto' is empty
-   if ($Config{'save'} ne "") {
-      $Config{'print'} = 0;
-   }
-   else {
-      $Config{'print'} = 1;
-   }
+   $Config{'print'} = 1;
 }
 
 if ($Config{'debug'} > 8) {
@@ -767,7 +751,7 @@ if ($Config{'debug'} > 7) {
 opendir(TMPDIR, $Config{'tmpdir'}) or die "$Config{'tmpdir'} $!";
 my @old_dirs = grep { /^logwatch\.\w{8}$/ && -d "$Config{'tmpdir'}/$_" }
    readdir(TMPDIR);
-if ((@old_dirs) && ($NoOldfilesLog==0)) {
+if (@old_dirs) {
    print "You have old files in your logwatch tmpdir ($Config{'tmpdir'}):\n\t";
    print join("\n\t", @old_dirs);
    print "\nThe directories listed above were most likely created by a\n";
@@ -861,10 +845,6 @@ foreach $LogFile (@LogFileList) {
    my $DestFile =  $TempDir . $LogFile . "-archive";
    my $Archive;
    foreach $Archive (@{$LogFileData{$LogFile}{'archives'}}) {
-      if ($Archive =~ /'/) {
-         print "File $Archive has invalid embedded quotes.  File ignored.\n";
-         next;
-      }
       my $CheckTime;
       # We need to find out what's the earliest log we need
       my @time_t = TimeBuild();
@@ -892,18 +872,18 @@ foreach $LogFile (@LogFileList) {
          #These system calls are not secure but we are getting closer
          #What needs to go is all the pipes and instead we need a command loop
          #For each filter to apply -mgt
-            my $arguments = "'${Archive}' >> $DestFile";
+            my $arguments = "$Archive >> $DestFile";
             system("$Config{'pathtozcat'} $arguments") == 0
                or die "system $Config{'pathtozcat'} failed: $?" 
          } elsif (($Archive =~ m/bz2$/) && (-f "$Archive")) {
          #These system calls are not secure but we are getting closer
          #What needs to go is all the pipes and instead we need a command loop
          #For each filter to apply -mgt
-            my $arguments = "'${Archive}' 2>/dev/null >> $DestFile";
+            my $arguments = "$Archive 2>/dev/null >> $DestFile";
             system("$Config{'pathtobzcat'} $arguments") == 0
                or die "system $Config{'pathtobzcat'} failed: $?" 
          } elsif (-f "$Archive") {
-            my $arguments = "'${Archive}'  >> $DestFile";
+            my $arguments = "$Archive  >> $DestFile";
             system("$Config{'pathtocat'} $arguments") == 0
                or die "system $Config{'pathtocat'} failed: $?" 
          } #End if/elsif existence
@@ -915,10 +895,6 @@ foreach $LogFile (@LogFileList) {
    foreach my $ThisFile (@FileList) {
       #Existence check for files -mgt
       next unless (-f $ThisFile);
-      if ($ThisFile =~ /'/) {
-         print "File $ThisFile has invalid embedded quotes.  File ignored.\n";
-         next;
-      }
       if (! -r $ThisFile) {
          print "File $ThisFile is not readable.  Check permissions.";
          if ($> != 0) {
@@ -927,7 +903,7 @@ foreach $LogFile (@LogFileList) {
          print "\n";
          next;
       }
-      $FileText .= ("'" . $ThisFile . "' ");
+      $FileText .= ($ThisFile . " ");
    } #End foreach ThisFile
 
    # remove the ENV entries set by previous service
@@ -939,16 +915,11 @@ foreach $LogFile (@LogFileList) {
    my $FilterText = " ";
    foreach (sort keys %{$LogFileData{$LogFile}}) {
       my $cmd = $_;
-      
       if ($cmd =~ s/^\d+-\*//) {
          if (-f "$ConfigDir/scripts/shared/$cmd") {
             $FilterText .= ("| $PerlVersion $ConfigDir/scripts/shared/$cmd '$LogFileData{$LogFile}{$_}'" );
          } elsif (-f "$BaseDir/scripts/shared/$cmd") {
-             if ($LogFile =~ /^vsftpd$/ ) {
-                 $FilterText .= ("| $PerlVersion $BaseDir/scripts/shared/applyvsftpddate '$LogFileData{$LogFile}{$_}'" );
-	     } else {
-                 $FilterText .= ("| $PerlVersion $BaseDir/scripts/shared/$cmd '$LogFileData{$LogFile}{$_}'" );      
-             }
+            $FilterText .= ("| $PerlVersion $BaseDir/scripts/shared/$cmd '$LogFileData{$LogFile}{$_}'" );
          } else {
 	     die "Cannot find shared script $cmd\n";
          }
