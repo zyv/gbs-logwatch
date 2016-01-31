@@ -157,6 +157,7 @@ my %wordsToInts = (yes  => 1,  no     => 0,
 
 sub getInt {
    my $word = shift;
+   unless (defined($word)) { return $word; }
    my $tmpWord = lc $word;
    $tmpWord =~ s/\W//g;
    return $wordsToInts{$tmpWord} if (defined $wordsToInts{$tmpWord});
@@ -165,10 +166,12 @@ sub getInt {
    }
    return $word;
 }
-              
+
 sub CleanVars {
    foreach (keys %Config) {
-      $Config{$_} = getInt($Config{$_});
+      unless (defined $Config{$_} and ($_ eq "hostname" or $_ eq "logdir")) {
+         $Config{$_} = getInt($Config{$_});
+      }
    }
 }
 
