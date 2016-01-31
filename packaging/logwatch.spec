@@ -1,11 +1,74 @@
 Summary: A log file analysis program
 Name: logwatch
 Version: 7.3.6
-Release: 49%{?dist}
+Release: 52%{?dist}
 License: MIT
 Group: Applications/System
 URL: http://www.logwatch.org/
 Source: ftp://ftp.kaybee.org/pub/linux/logwatch-%{version}.tar.gz
+Patch2: logwatch-7.3.1-vsftpd.patch
+Patch4: logwatch-7.3.6-secure.patch
+Patch5: logwatch-7.3.6-xntpd.patch
+Patch6: logwatch-7.3.4-sshd.patch
+Patch9: logwatch-7.3.4-sshd3.patch
+Patch10: logwatch-7.3.4-named.patch
+Patch11: logwatch-7.3.6-named2.patch
+Patch12: logwatch-7.3.6-audit.patch
+Patch13: logwatch-7.3.6-pam_unix.patch
+Patch14: logwatch-7.3.6-named3.patch
+Patch15: logwatch-7.3.6-cron.patch
+Patch16: logwatch-7.3.6-zz-disk_space.patch
+Patch17: logwatch-7.3.6-cron2.patch
+Patch18: logwatch-7.3.6-cron3.patch
+Patch20: logwatch-7.3.6-secure1.patch
+Patch21: logwatch-7.3.6-sudo.patch
+Patch22: logwatch-7.3.6-sshd1.patch
+Patch23: logwatch-7.3.6-clamav-milter.patch
+Patch24: logwatch-7.3.6-conf.patch
+Patch26: logwatch-7.3.6-amavis.patch
+Patch27: logwatch-7.3.6-oldfiles.patch
+Patch28: logwatch-7.3.6-usage.patch
+Patch29: logwatch-7.3.6-maillog.patch
+Patch30: logwatch-7.3.6-amavis2.patch
+Patch31: logwatch-7.3.6-openvpn.patch
+Patch32: logwatch-7.3.6-postfix.patch
+Patch33: logwatch-7.3.6-cron4.patch
+Patch34: logwatch-7.3.6-dovecot_back.patch
+Patch35: logwatch-7.3.6-audit2.patch
+Patch36: logwatch-7.3.6-openvpn2.patch
+Patch37: logwatch-7.3.6-sendmail.patch
+Patch38: logwatch-7.3.6-audit3.patch
+Patch39: logwatch-7.3.6-init.patch
+Patch40: logwatch-7.3.6-cron5.patch
+Patch41: logwatch-7.3.6-logrotate.patch
+Patch45: logwatch-7.3.6-init2.patch
+Patch46: logwatch-7.3.6-secure2.patch
+Patch47: logwatch-7.3.6-exim.patch
+Patch48: logwatch-7.3.6-zz-disk_space2.patch
+Patch49: logwatch-7.3.6-dovecot.patch
+Patch50: logwatch-7.3.6-named4.patch
+Patch51: logwatch-7.3.6-openvpn3.patch
+Patch52: logwatch-7.3.6-smartd.patch
+Patch53: logwatch-7.3.6-sshd2.patch
+Patch54: logwatch-7.3.6-exim2.patch
+Patch55: logwatch-7.3.6-removeservice.patch
+Patch56: logwatch-7.3.6-cron_conf.patch
+Patch57: logwatch-7.3.6-named5.patch
+Patch58: logwatch-7.3.6-sanitize-log-filenames.patch
+Patch59: logwatch-7.3.6-dovecot-new.patch
+Patch60: logwatch-7.3.6-http.patch
+Patch61: logwatch-7.3.6-mailto.patch
+Patch62: logwatch-7.3.6-named-dnssec.patch
+Patch63: logwatch-7.3.6-pluto.patch
+Patch64: logwatch-7.3.6-postfix-pipelining.patch
+Patch65: logwatch-7.3.6-secure-username.patch
+Patch66: logwatch-7.3.6-up2date.patch
+Patch67: logwatch-7.3.6-smartd2.patch
+Patch68: logwatch-7.3.6-su-l.patch
+Patch69: logwatch-7.3.6-applystddate.patch
+Patch70: logwatch-7.3.6-kerberos-logins.patch
+Patch71: logwatch-7.3.6-xvc.patch
+
 Requires: textutils sh-utils grep mailx
 Requires: perl(Date::Manip)
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -19,6 +82,68 @@ of the package on many systems.
 
 %prep
 %setup -q
+%patch2 -p1
+%patch4 -p1
+%patch5 -p1
+%patch6 -p1
+%patch9 -p1
+%patch10 -p1
+%patch11 -p1
+%patch12 -p1
+%patch13 -p1
+%patch14 -p1
+%patch15 -p1
+%patch16 -p1
+%patch17 -p1
+%patch18 -p1
+%patch20 -p1
+%patch21 -p1
+%patch22 -p1
+%patch23 -p1
+%patch24 -p1
+%patch26 -p1
+%patch27 -p1
+%patch28 -p1
+%patch29 -p1
+%patch30 -p1
+%patch31 -p1
+%patch32 -p1
+%patch33 -p1
+%patch34 -p1
+%patch35 -p1
+%patch36 -p1
+%patch37 -p1
+%patch38 -p1
+%patch39 -p1
+%patch40 -p1
+%patch41 -p1
+%patch45 -p1
+%patch46 -p1
+%patch47 -p1
+%patch48 -p1
+%patch49 -p1
+%patch50 -p1
+%patch51 -p1
+%patch52 -p1
+%patch53 -p1
+%patch54 -p1
+%patch55 -p1
+%patch56 -p1
+%patch57 -p1
+%patch58 -p1
+%patch59 -p1
+%patch60 -p1
+%patch61 -p1
+%patch62 -p1
+%patch63 -p1
+%patch64 -p1
+%patch65 -p1
+%patch66 -p1
+%patch67 -p1
+%patch68 -p1
+%patch69 -p1
+%patch70 -p1
+%patch71 -p1
 rm -f scripts/services/*.orig
 
 %build
@@ -142,6 +267,25 @@ rm -rf %{buildroot}
 %doc License project/CHANGES 
 
 %changelog
+* Thu Jun 13 2013 Jan Synáček <jsynacek@redhat.com> - 7.3.6-52
+- Fix: logwatch shows unknown entries for su - (#974042)
+- Fix: logwatch must understand RSYSLOG_FileFormat timestamps (#974044)
+- Fix: Logwatch does not recognise ssh Kerberos (GSS) logins. (#974046)
+- Fix: Logins through xen virt console are under unmatched entries (#974047)
+
+* Thu Jun  6 2013 Jan Synáček <jsynacek@redhat.com> - 7.3.6-51
+- Fix: Ignore the ignorable openswan messages (#799690)
+- Fix: Logwatch does not handle "improper command pipelining after (NOOP|RSET)" (#894185)
+- Fix: Logwatch doesn't proper ignore "password check failed for user" (#894191)
+- Fix: logwatch/up2date fix and extension (#737247)
+- Fix: logwatch a bit chatty with smartd (#888007)
+
+* Wed Jun  5 2013 Jan Synáček <jsynacek@redhat.com> - 7.3.6-50
+- Fix: Logwatch doesn't parse Dovecot 2.x log messages proper (#799987)
+- Fix: logwatch "http" script should treat APT .hdr files as "archives" (#800843)
+- Fix: logwatch does not create log file when 'MailTo' in config file has no value (#837034)
+- Fix: Zillions of "SOA: no valid signature found" in logwatch mails (#894134)
+
 * Mon Feb 28 2011 Karel Klic <kklic@redhat.com> - 7.3.6-49
 - Added fix for CVE-2011-1018: Privilege escalation due improper
   sanitization of special characters in log file names

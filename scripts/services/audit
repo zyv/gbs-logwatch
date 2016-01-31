@@ -79,11 +79,10 @@ while ($ThisLine = <STDIN>) {
 	( $ThisLine =~ /^audit\([0-9.]+:[0-9]+\): ( ?(path|cwd|item|name|flags)=["\/A-Za-z0-9]*)*$/) or
 	( $ThisLine =~ /: enforcing=[0-9]+ old_enforcing=[0-9]+ auid=[0-9]+/) or
 	( $ThisLine =~ /: policy loaded auid=[0-9]+/) or
-	( $ThisLine =~ /: user pid=[0-9]+ uid=[0-9]+ auid=[0-9]+ subj=system_u:system_r:system_dbusd_t:[0-9a-z:.\-]+ msg=/) or
+	( $ThisLine =~ /: user pid=[0-9]+ uid=[0-9]+ auid=[0-9]+ subj=system_u:system_r:system_dbusd_t:[0-9a-z]+ msg=/) or
 	( $ThisLine =~ /audit\([0-9.]+:[0-9]+\): (selinux=[0-9]+|auid=[0-9]+|prom=[0-9]+|old_prom=[0-9]+|dev=[^ ]+| )+$/) or
         ( $ThisLine =~ /auditd[ ]+S [0-9A-F]+  [0-9]+  [0-9]+[ ]+[0-9]([ ]*[0-9]+[ ]*|[ ]*)[0-9]+  [0-9]+ \(NOTLB\)/) or
-        ( $ThisLine =~ /Started dispatcher: \/sbin\/audispd pid: [0-9]+/) or
-        ( $ThisLine =~ /audit\([0-9.]*:[0-9]*\): bool=.* val=.* old_val=.* auid=[0-9]*/)
+        ( $ThisLine =~ /Started dispatcher: \/sbin\/audispd pid: [0-9]+/)
     ) { 
 	# Ignore these entries
     } elsif ( $ThisLine =~ /audit\([0-9]{10}.[0-9]{3}:[0-9]\): initialized$/) {
@@ -115,8 +114,6 @@ while ($ThisLine = <STDIN>) {
 	    $grants{$2.' '.$3.' ('.$1.$4 . ')'}++;
 	} elsif ($ThisLine =~ /security_compute_sid:\s*invalid context\s*(\S+)\s*for\s*scontext=(\S+)\s*tcontext=(\S+)\s*tclass=(\S+)/ ) {
 	    $InvalidContext{$4." running as ".$2." acting on ".$3." \nshould transit to invalid ".$1}++;
-        } elsif ($ThisLine =~ /security_sid_mls_copy:\s*invalid context\s*(\S+)/) {
-                    $InvalidContext{"context: ".$1}++;
 	} else { 
             $othercount++;
             $ThisLine =~ s/^\s*//;
@@ -131,8 +128,6 @@ while ($ThisLine = <STDIN>) {
 	    $grants{$1.' '.$2.' ('.$3 . ')'}++;
 	} elsif ($ThisLine =~ /security_compute_sid:\s*invalid context\s*(\S+)\s*for\s*scontext=(\S+)\s*tcontext=\S+\s*tclass=(\S+)/ ) {
 	    $InvalidContext{$3." running as ".$2." should transit to invalid ".$1}++;
-        } elsif ($ThisLine =~ /security_sid_mls_copy:\s*invalid context\s*(\S+)/) {
-            $InvalidContext{"context: ".$1}++;                    
 	} else {
             $othercount++;
             $ThisLine =~ s/^\s*//;
@@ -147,8 +142,6 @@ while ($ThisLine = <STDIN>) {
 	    $grants{$1.' '.$2.' ('.$3 . ')'}++;
 	} elsif ($ThisLine =~ /security_compute_sid:\s*invalid context\s*(\S+)\s*for\s*scontext=(\S+)\s*tcontext=\S+\s*tclass=(\S+)/ ) {
    	    $InvalidContext{$3." running as ".$2." should transit to invalid ".$1}++;  
-   	} elsif ($ThisLine =~ /security_sid_mls_copy:\s*invalid context\s*(\S+)/) { 
-   	    $InvalidContext{"context: ".$1}++;
 	} else {
             $othercount++;
             $ThisLine =~ s/^\s*//;

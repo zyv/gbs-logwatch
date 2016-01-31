@@ -20,7 +20,7 @@ if ( $ENV{'LOGWATCH_DEBUG'} > 5 ) {
 }
 
 while (defined($ThisLine = <STDIN>)) {
-    if ($ThisLine =~ m/^... .. ..:..:..[ ]*[^ ]* $ServiceName\[[0123456789]*\]: /io) {
+    if ($ThisLine =~ m/^... .. ..:..:.. [^ ]* $ServiceName\[[0123456789]*\]: /io) {
       print $ThisLine;
     }
     elsif ($ThisLine =~ m/^... .. ..:..:.. [^ ]* [^ ]*\[[0123456789]*\]: \[ID [0-9]+ $ServiceName/io) {

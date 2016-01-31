@@ -98,15 +98,7 @@ while (defined($ThisLine = <STDIN>)) {
       ($ThisLine =~ /INFO \(Running \@(re)?boot jobs\)/) or
       ($ThisLine =~ /INFO \(Skipping \@(re)?boot jobs -- not system startup\)/) or
       ($ThisLine =~ /INFO \(not boot nor reboot\)/) or
-      ($ThisLine =~ /logfile turned over/) or
-      ($ThisLine =~ /ready to process filesystem events/) or # newsyslog on OpenBSD
-      ($ThisLine =~ /loading (system|user) tables/) or
-      ($ThisLine =~ /loading table .*/) or 
-      ($ThisLine =~ /void Inotify::Remove\(InotifyWatch\*\): removing watch failed/) or 
-      ($ThisLine =~ /error: \(22\) Invalid argument/) or
-      ($ThisLine =~ /INFO \(running with inotify support\)/) or
-      ($ThisLine =~ /INFO \(\@reboot jobs will be run at computer's startup.\)/)
-      
+      ($ThisLine =~ /logfile turned over/) # newsyslog on OpenBSD
    ) {
       # Ignore
    } elsif (
@@ -149,14 +141,8 @@ while (defined($ThisLine = <STDIN>)) {
          $Errors{$Reason}++;
       } elsif ( ($FileName) = ($ThisLine =~ /BAD FILE MODE \((.+)\)/) ) {
          $BFMFile{$FileName}++; 
-      } elsif ( ($FileName) = ($ThisLine =~ /WRONG FILE OWNER \((.+)\)/) ) {
+      } elsif ( ($FileName) = ($ThisLine = /WRONG FILE OWNER \((.+)\)/) ) {
          $WFO{$FileName}++;
-      } elsif ($ThisLine =~ /FAILED to authorize user with PAM \(User not known to the underlying authentication module\)/) {
-          $PAMAUTHErr++;
-      } elsif ( ($FileName,$Cause) = ($ThisLine =~ /ERROR chdir failed \((.*)\): (.*)/) ) {
-          $CHDIRErr{"$FileName,$Cause"}++;
-      } elsif ($ThisLine =~ /ERROR \(failed to change user\)/) {
-          $CHUSERHErr++;       
       } else {
          # Report any unmatched entries...
          push @OtherList, "$ThisLine\n";
@@ -189,36 +175,6 @@ while (defined($ThisLine = <STDIN>)) {
 	  if ( $ntpdatemaxoffset < $offset ) { $ntpdatemaxoffset = $offset; }
    } elsif ($ThisLine =~ /ntpdate\[\d+\]: no server suitable for synchronization found/) {
      $ntpdatenosync++;
-   } elsif (($ThisLine =~ /incrond/) && ($ThisLine =~ /starting service/)) {
-      $INCRONDSS++;
-   } elsif (($ThisLine =~ /incrond/) && ($ThisLine =~ /stopping service/)) {
-      $INCRONDStS++;
-   } elsif (($ThisLine =~ /incrond/) && (($Table) = ($ThisLine =~ /system table (.*) created, loading/))) {
-      $INCRONDSTCr{$Table}++;
-   } elsif (($ThisLine =~ /incrond/) && (($User) = ($ThisLine =~ /table for user (.*) created, loading/))) {
-      $INCRONDUTCr{$User}++;
-   } elsif (($ThisLine =~ /incrond/) && (($Table) = ($ThisLine =~ /system table (.*) changed, reloading/))) {
-      $INCRONDSTCh{$Table}++;
-   } elsif (($ThisLine =~ /incrond/) && (($User) = ($ThisLine =~ /table for user (.*) changed, reloading/))) {
-      $INCRONDUTCh{$User}++;
-   } elsif (($ThisLine =~ /incrond/) && (($Table) = ($ThisLine =~ /system table (.*) destroyed, removing/))) {
-      $INCRONDSTDe{$Table}++;
-   } elsif (($ThisLine =~ /incrond/) && (($User) = ($ThisLine =~ /table for user (.*) destroyed, removing/))) {
-      $INCRONDUTDe{$User}++;
-   } elsif (  ($ThisLine =~ /incrond/) && 
-      ( (($Error) = ($ThisLine =~ /(cannot create watch for (system table|user) .*: \(2\) No such file or directory)/)) ||
-      (($Error) = ($ThisLine =~ /(access denied on (.*) - events will be discarded silently)/)) || 
-      (($Error) = ($ThisLine =~ /(unhandled exception occurred)/)) ||
-      (($Error) = ($ThisLine =~ /(cannot exec process.*)/)) 
-      )  ) {
-      $INCRONDErr{$Error}++;
-   } elsif ( ($ThisLine =~ /crond/) &&
-	(($Error) = ($ThisLine =~ /(failed to open PAM security session: (Permission denied|Module is unknown))/)) 
-	) {
-      $CRONDErr{$Error}++;
-   } elsif (( ($Error) = ($ThisLine =~ /ERROR: (failed to change SELinux context)/)) or
-           (($Error) = ($ThisLine =~ /ERROR:(Could not set exec context to .* for .*)/))) {
-      $SELCONTErr{$Error}++;
    } else {
       # Report any unmatched entries...
       push @OtherList, "$ThisLine\n";
@@ -305,83 +261,6 @@ if ($Ntpdate) {
 if($ntpdatenosync) {
    print "\nNtpDate could not sync: $ntpdatenosync times\n";
 }
-
-if ($INCRONDSS) {
-  printf "\n  service incrond started " . $INCRONDSS . ": time(s)\n";
-}  
-
-if ($INCRONDStS) {
-  printf "\n  service incrond stoped " . $INCRONDStS . ": time(s)\n";
-}
-
-if ((%INCRONDSTCr) || (%INCRONDUTCr)) {
-  printf "\n  created tables \n";
-  for $key (keys %INCRONDSTCr) {
-    print "    system table " . $key . " created " . $INCRONDSTCr{$key} . ": time(s)\n";
-  }
-  for $key (keys %INCRONDUTCr) {
-    print "    table for user " . $key . " ceated " . $INCRONDUTCr{$key}. ": time(s)\n";
-  }
-}
-
-if ((%INCRONDSTCh) || (%INCRONDUTCh)) {
-  printf "\n  changes of tables \n";
-  for $key (keys %INCRONDSTCh) {
-    print "    system table " . $key . " changed " . $INCRONDSTCh{$key} . ": time(s)\n";
-  }
-  for $key (keys %INCRONDUTCh) {
-    print "    table for user " . $key . "changed " . $INCRONDUTCh{$key} . ": time(s)\n";
-  }
-}
-          
-if ((%INCRONDSTDe) || (%INCRONDUTDe)) {
-  printf "\n  destroyed tables \n";
-  for $key (keys %INCRONDSTDe) {
-     print "    system table " . $key . " destroyed " . $INCRONDSTDe{$key} . ": time(s)\n";
-  }
-  for $key (keys %INCRONDUTDe) {
-     print "    table for user ". $key ." destroyed " .$INCRONDUTDe{$key} . ": time(s)\n";
-  }
-}
-
-if (%CRONDErr) {
-  printf "\n  crond daemon errors \n";
-  for $key (keys %CRONDErr) {
-    print "    " . $key . ": " . $CRONDErr{$key} . " time(s)\n";
-  }
-}          
-
-if (%INCRONDErr) {
-  printf "\n  incrond daemon errors \n";
-  for $key (keys %INCRONDErr) {
-    print "    " . $key . ": " . $INCRONDErr{$key} . " time(s)\n";
-  }
-}
-
-if (%SELCONTErr) {
-  printf "\n  SELinux context error \n";
-  for $key (keys %SELCONTErr) {
-    print "    " . $key . ": " . $SELCONTErr{$key} . " time(s)\n";
-  }
-}
-
-if ($PAMAUTHErr) {
-   printf "\nPAM autentification error: " . $PAMAUTHErr . " time(s)\n";
-}
-
-if (%CHDIRErr) {
-  printf "\nchdir command failed\n";
-  foreach (keys %CHDIRErr) {
-    my ($File,$Cause) = split ",";
-    print "    for directory " . $File . " (" . $Cause . ")". ": " . $CHDIRErr{"$File,$Cause"} . " time(s)\n";
-  }
-}
-
-if ($CHUSERHErr) {
-   printf "\nUser change error: " . $CHUSERHErr . " time(s)\n";
-}
-
-
 
 if ($#OtherList >= 0) {
    print "\n**Unmatched Entries**\n";

@@ -16,9 +16,7 @@ while (defined($ThisLine = <STDIN>)) {
        ( $ThisLine =~ /^clamav-milter (startup|shutdown) succeeded$/ ) or
        ( $ThisLine =~ /^Quarantined infected mail as/ ) or 
        ( $ThisLine =~ /^File quarantined as/ ) or
-       ( $ThisLine =~ /^ClamAv: mi_stop/ ) or
-       ( $ThisLine =~ m#^\/tmp\/clamav-.* .* FOUND# )) {
-       
+       ( $ThisLine =~ /^ClamAv: mi_stop/ )) {
        # We do not care about these.
    } elsif (($ThisLine =~ /clean message from/)) {
       $CleanMessage++;
