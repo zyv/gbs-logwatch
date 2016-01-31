@@ -61,7 +61,13 @@ my (@ReadConfigNames, @ReadConfigValues);
 
 # Default config here...
 $Config{'detail'} = 0;
-$Config{'mailto'} = "root";
+# if MAILTO is set in the environment, grab it, as it may be used by cron 
+# or anacron 
+if ($ENV{'MAILTO'}) { 
+    $Config{'mailto'} = $ENV{'MAILTO'}; 
+} else { 
+    $Config{'mailto'} = "root"; 
+} 
 $Config{'mailfrom'} = "Logwatch";
 $Config{'save'} = "";
 $Config{'print'} = 1;
