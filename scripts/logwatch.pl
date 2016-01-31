@@ -915,11 +915,16 @@ foreach $LogFile (@LogFileList) {
    my $FilterText = " ";
    foreach (sort keys %{$LogFileData{$LogFile}}) {
       my $cmd = $_;
+      
       if ($cmd =~ s/^\d+-\*//) {
          if (-f "$ConfigDir/scripts/shared/$cmd") {
             $FilterText .= ("| $PerlVersion $ConfigDir/scripts/shared/$cmd '$LogFileData{$LogFile}{$_}'" );
          } elsif (-f "$BaseDir/scripts/shared/$cmd") {
-            $FilterText .= ("| $PerlVersion $BaseDir/scripts/shared/$cmd '$LogFileData{$LogFile}{$_}'" );
+             if ($LogFile =~ /^vsftpd$/ ) {
+                 $FilterText .= ("| $PerlVersion $BaseDir/scripts/shared/applyvsftpddate '$LogFileData{$LogFile}{$_}'" );
+	     } else {
+                 $FilterText .= ("| $PerlVersion $BaseDir/scripts/shared/$cmd '$LogFileData{$LogFile}{$_}'" );      
+             }
          } else {
 	     die "Cannot find shared script $cmd\n";
          }
