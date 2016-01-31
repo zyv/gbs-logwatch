@@ -172,8 +172,6 @@ my %KrbErr = ();
 my @BadRSA = ();
 my @Scanned = ();
 my %OtherList = ();
-my %ChmodErr = ();
-my %ChownErr = ();
 
 my $sftpRequests = 0;
 my $NetworkErrors = 0;
@@ -230,8 +228,7 @@ while (defined(my $ThisLine = <STDIN>)) {
        ($ThisLine =~ /^input_userauth_request: (illegal|invalid) user (.*)$/ ) or
        ($ThisLine =~ m/^(Illegal|Invalid) user (.*) from ([^ ]+)/ ) or
        ($ThisLine =~ /pam_krb5: authentication succeeds for `([^ ]*)'/) or
-       ($ThisLine =~ /pam_succeed_if\(.*:.*\): error retrieving information about user [a-zA-Z]*/ ) or
-       ($ThisLine =~ /^debug1: /)
+       ( $ThisLine =~ /pam_succeed_if\(.*:.*\): error retrieving information about user [a-zA-Z]*/ )           
    ) {
       # Ignore these
    } elsif ( my ($Method,$User,$Host,$Port) = ($ThisLine =~ /^Accepted (\S+) for (\S+) from ([\d\.:a-f]+) port (\d+)/) ) {
@@ -306,8 +303,7 @@ while (defined(my $ThisLine = <STDIN>)) {
       $BadLogins{$Host}{"$User/$Method"}++;
    } elsif ($ThisLine =~ s/^(log: )?Could not reverse map address ([^ ]*).*$/$2/) {
       $NoRevMap{$ThisLine}++;
-   } elsif ( my ($Address) = ($ThisLine =~ /^reverse mapping checking getaddrinfo for ([^ ]*) failed - POSSIBLE BREAK-?IN ATTEMPT!/)) {
-
+   } elsif ( my ($Address) = ($ThisLine =~ /^reverse mapping checking getaddrinfo for ([^ ]*) failed - POSSIBLE BREAKIN ATTEMPT!/)) {
       $NoRevMap{$Address}++;
    } elsif ( my ($IP,$Address) = ($ThisLine =~ /^Address ([^ ]*) maps to ([^ ]*), but this does not map back to the address - POSSIBLE BREAKIN ATTEMPT!/)) {
       $NoRevMap{"$Address($IP)"}++;
@@ -358,11 +354,6 @@ while (defined(my $ThisLine = <STDIN>)) {
       $KrbErr{"error removing file " . $Error}++;     
    } elsif ( my ($Pom,$Error) = ($ThisLine =~ /pam_krb5(\[\d*\]): error resolving user name '[^ ]*' to uid\/gid pai/)) {
       $KrbErr{"error resolving user name '$Error' to uid\/gid pai"}++;
-      # error: chmod /dev/pts/0 0666 failed: Permission denied
-   } elsif (my ($File,$Perm,$Why) = ($ThisLine =~ /error: chmod (.*) (.*) failed: (.*)/)) {
-      $ChmodErr{"$File,$Perm,$Why"}++;
-   } elsif (my ($File,$From,$To,$Why) = ($ThisLine =~ /error: chown (.*) (.*) (.*) failed: (.*)/)) {
-      $ChownErr{"$File,$From,$To,$Why"}++;            
    } else {
       # Report any unmatched entries...
       unless ($ThisLine =~ /fwd X11 connect/) {
@@ -644,23 +635,6 @@ if (keys %TTYModesFail) {
 if ($sftpRequests > 0) {
    print "\nSFTP subsystem requests: $sftpRequests Time(s)\n";
 }
-
-if (keys %ChmodErr) {
-  print "\nChmod errors:\n";
-  foreach (keys %ChmodErr) {
-    my ($File,$Perm,$Why)= split ",";
-    print "   " . $File . " " . $Perm . " failed(" . $Why . "): ". $ChmodErr{"$File,$Perm,$Why"} . " Time(s)\n";
-  }
-}
-
-if (keys %ChownErr) {
-  print "\nChown errors:\n";
-  foreach (keys %ChownErr) { 
-    my ($File,$From,$To,$Why)= split ",";
-    print "   " . $File . " " . $From . " " .$To . " failed(" . $Why . "): ". $ChmodErr{"$File,$From,$To,$Why"} . " Time(s)\n";
-  }
-}
-              
 
 if (keys %OtherList) {
    print "\n**Unmatched Entries**\n";

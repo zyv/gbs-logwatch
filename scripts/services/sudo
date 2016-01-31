@@ -31,11 +31,7 @@ my $CmdsThresh = $ENV{'command_run_threshold'} || 0;
 my ($user, $error, $tty, $dir, $euser, $cmd, $args);
 
 while (defined(my $ThisLine = <STDIN>)) {
-   if ($ThisLine =~ /pam_unix\(sudo:auth\): authentication failure; logname=\S* uid=[0-9]* euid=[0-9]* tty=\S* ruser=\S* rhost=\S*  user=\S*/)
-	# this log is parsed in pam_unix section
-   {    
-     # Ignore
-   }elsif ( ($user, $error, $tty, $dir, $euser, $cmd, $args) = $ThisLine =~ m/^\s*(\w+) : (.*; )?TTY=(\S+) ; PWD=(.*?) ; USER=(\S+) ; COMMAND=(\S+)( ?.*)/) {
+   if ( ($user, $error, $tty, $dir, $euser, $cmd, $args) = $ThisLine =~ m/^\s*(\w+) : (.*; )?TTY=(\S+) ; PWD=(.*?) ; USER=(\S+) ; COMMAND=(\S+)( ?.*)/) {
       push @{$byUser{$user}{$euser}}, [$error . $cmd,$args, $dir, $tty];
       $byUserSum{$user}{$euser}{$cmd} += 1;
    } elsif ( ($user,$euser) = $ThisLine =~ /^\s*(\w+) : no passwd entry for (\w+)\!$/) {
