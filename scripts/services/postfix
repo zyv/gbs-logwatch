@@ -504,6 +504,7 @@ my @Formats = (
    [ 'HostnameVerification',        "d", "Hostname verification errors" ],
    [ 'HostnameValidationError',     "d", "Hostname validation error" ],
    [ 'Deliverable',                 "d", "Address is deliverable (sendmail -bv)" ],
+   [ 'SmtpProtocolViolation',       "d", 'SMTP protocol violations' ],
    [ 'Undeliverable',               "d", "Address is undeliverable (sendmail -bv)" ],
    [ 'TableChanged',                "d", "Restarts due to lookup table change" ],
    [ 'PixWorkaround',               "d", "Enabled PIX workaround" ],
@@ -1664,6 +1665,15 @@ while ( <> ) {
     #TD looking for plugins in '/usr/lib/sasl2', failed to open directory, error: No such file or directory
       $Totals{'WarnConfigError'}++;
       $Counts{'WarnConfigError'}{$key}++;
+   }
+
+   # SMTP/ESMTP protocol violations
+   elsif ($p1 =~ /^(improper command pipelining) (after \S+) from ([^[]*)\[([^]]+)\](?::\d+)?/) {
+      # ProtocolViolation
+      #TDsd postfix/smtpd[24928]: improper command pipelining after RCPT from unknown[192.168.0.1]
+      my ($error,$stage,$host,$hostip) = ($1,$2,$3,$4);
+      $Totals{'SmtpProtocolViolation'}++;
+      $Counts{'SmtpProtocolViolation'}{$error}{$stage}{formathost($hostip,$host)}++;
    }
 
    # rare messages (mostly debug) hit less frequently - keep far down the if-elsif chain
