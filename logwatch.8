@@ -25,7 +25,8 @@ logwatch \- system log analyzer and reporter
 .I hostname
 .B ] [--splithosts] [--multiemail] [--output
 .I output-type
-.B ] [--numeric] [--version] [--help|--usage]
+.B ] [--numeric]  [--no-oldfiles-log]
+.B [--version] [--help|--usage]
 .SH DESCRIPTION
 .B Logwatch
 is a customizable, pluggable log-monitoring system.  It will go
@@ -100,6 +101,9 @@ if HostLimit is set in the logwatch.conf configuration file (see
 then only logs from this hostname will be processed (where appropriate).
 .IP "\fB--numeric\fR"
 Inhibits additional name lookups, displaying IP addresses numerically.
+.IP "\fB--no-oldfiles-log\fR" 
+Suppress the logwatch log, which informs about the 
+old files in logwatch tmpdir. 
 .IP "\fB--usage\fR"
 Displays usage information
 .IP "\fB--help\fR"
