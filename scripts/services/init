@@ -34,6 +34,9 @@ while (defined($ThisLine = <STDIN>)) {
 	   chomp ($ThisLine);
 	   $ReExecInit++;
    }
+   elsif ( ($Name,$Cause) = ($ThisLine =~ /(.*) main process \([0-9]*\) killed by (.*) /)) {
+       $ProcessKilled{"$Name,$Cause"}++;
+   }
    else {
       # report any unmatched entries
       push @OtherList,$ThisLine;
@@ -45,8 +48,17 @@ if ((keys %RunLevel) and ($Detail >= 10)) {
       print "   Entered or switched to runlevel " . $Level . ": " . $RunLevel{$Level} . " Time(s)\n";
    }
 }
+
 if ($ReExecInit) {
 	print "\n\nRe-execs of init: $ReExecInit times\n";
+}
+
+if ((keys %ProcessKilled) and ($Detail >=10)) {
+   print "\nKilled processses:\n";
+   foreach (keys %ProcessKilled) {
+      my ($Name,$Cause)=split ",";
+      print "   Process " . $Name. " killed by " . $Cause . ": " . $ProcessKilled{"$Name,$Cause"} . " Time(s)\n";
+   }
 }
 
 if ($#OtherList >= 0) {
