@@ -416,7 +416,13 @@ if (($Config{'save'} ne "") && (-e "$Config{'save'}") ) {
 }
 
 if ($Config{'mailto'} eq "") {
-   $Config{'print'} = 1;
+   #Additionally check for 'save' if 'mailto' is empty
+   if ($Config{'save'} ne "") {
+      $Config{'print'} = 0;
+   }
+   else {
+      $Config{'print'} = 1;
+   }
 }
 
 if ($Config{'debug'} > 8) {
