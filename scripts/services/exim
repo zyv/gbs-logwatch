@@ -275,11 +275,13 @@ if ($Detail >= $LvlRestart) {
 }
 
 if ($Detail >= $LvlRestart) {
-   print "\n--- Queue Runners ---\n";
-   # Start Queue
-   $StartQueue and print "  Start queue run: $StartQueue Time(s)\n";
-   # End Queue
-   $EndQueue and print "  End queue run: $EndQueue Time(s)\n";
+   if (($StartQueue >0 ) or ($EndQueue > 0)) {
+      print "\n--- Queue Runners ---\n";
+      # Start Queue
+      $StartQueue and print "  Start queue run: $StartQueue Time(s)\n";
+      # End Queue
+      $EndQueue and print "  End queue run: $EndQueue Time(s)\n";
+   }
 }
 
 if ($Detail >= $LvlVerify) {
