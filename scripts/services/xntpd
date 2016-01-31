@@ -112,7 +112,8 @@ while (defined(my $ThisLine = <STDIN>)) {
         ($ThisLine =~ m/signal_no_reset: signal \d+ had flags \d+/) or
         ($ThisLine =~ /Deleting interface \#[0-9] [^,]*, [^,]*, interface stats: received=.*, sent=.*, dropped=.*, active_time=.* secs/) or
         ($ThisLine =~ /Invalid argument/) or
-        ($ThisLine =~ /Listening on interface .* Disabled/)
+        ($ThisLine =~ /Listening on interface .* Disabled/) or
+        ($ThisLine =~ /Listening on interface .* Enabled/)
     ) {
        # Ignore these
     } elsif ($ThisLine =~ m/ntpd [\d\-\.\w@]+ ... ... .. ..:..:.. /) {
