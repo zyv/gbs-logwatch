@@ -169,7 +169,7 @@ sub DiskFull
      my @fields = split(' ', $row);
      my $use = $fields[4];
      $use =~ s/%//;
-     if ($use > $diskfull_threshhold)
+     if (($use > $diskfull_threshhold) && ($fields[0] !~ /\/dev\/scd/ ) && ($fields[0] !~ /\/dev\/sr/ ))
      {
        print "$fields[0] => $fields[4] Used. Warning. Disk Filling up.\n";
      }
